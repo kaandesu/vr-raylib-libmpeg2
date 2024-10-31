@@ -1,4 +1,6 @@
 compile_commands.json
 vr-raylib-libmpeg2
 .DS_Store
+.cache
+*.o
 
