@@ -12,6 +12,10 @@ So far:
 - Implemented video playback using Raylib and libmpeg2 to decode MPEG-2 video.
 - Managed frame parsing and rendering at ~30 FPS, converting video frames to RGB for display.
 
+<div align="center">
+  <img width="520" src="./data/demo.gif">
+</div>
+
 ### Project Setup for macOS and Linux
 
 This document outlines the steps to set up the development environment for the project on both macOS and Linux.
