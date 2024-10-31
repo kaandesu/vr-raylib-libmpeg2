@@ -1,4 +1,4 @@
-## Project Description
+## vr-raylib-libmpeg2
 
 This project is about streaming video to Raylib in VR format, using [libmpeg2](https://libmpeg2.sourceforge.io/)
 for decoding. The main goal is to stream the PC desktop to mobile VR in a 3D virtual environment.
