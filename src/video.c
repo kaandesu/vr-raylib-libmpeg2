@@ -31,11 +31,13 @@
 #include <mpeg2dec/mpeg2.h>
 #include <mpeg2dec/mpeg2convert.h>
 
-#define WIDHT 600
-#define HEIGHT 300
+#define WIDHT 720
+#define HEIGHT 480
 #define BUFFER_SIZE 4096
+#define STREAM_FRAME_RATE 60
 
 #define VID "data/eq.mpg"
+// #define VID "data/orion.mpg"
 
 int main(void) {
   InitWindow(WIDHT, HEIGHT, "raylib example - mpeg2 decode");
@@ -57,59 +59,52 @@ int main(void) {
   }
 
   bool knowDims = false;
-  float currentPeriod = 1;
-  float period = 1;
   int framenum = 0;
 
-  SetTargetFPS(60);
+  SetTargetFPS(STREAM_FRAME_RATE);
   Image img = {0};
   Texture texture = {0};
 
+  int lastFrame;
   while (!WindowShouldClose()) {
-    int lastFrame = framenum;
-    currentPeriod += period;
-    if (currentPeriod > 1.0) {
-      currentPeriod -= 1.0;
-      while (lastFrame == framenum) {
-        state = mpeg2_parse(decoder);
-        switch (state) {
-        case STATE_BUFFER:
-          size = fread(buffer, 1, BUFFER_SIZE, videoFile);
-          mpeg2_buffer(decoder, buffer, buffer + size);
-          if (size == 0) {
-            rewind(videoFile);
-            framenum = 0;
-          }
-          break;
-        case STATE_SEQUENCE:
-          mpeg2_convert(decoder, mpeg2convert_rgb24, NULL);
-          break;
-        case STATE_SLICE:
-        case STATE_END:
-        case STATE_INVALID_END:
-          if (info->display_fbuf) {
-            if (knowDims == false) {
-              knowDims = true;
-              img.width = info->sequence->width;
-              img.height = info->sequence->height;
-              img.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
-              img.mipmaps = 1;
-              img.data = (unsigned char *)malloc(img.width * img.height * 3);
-              texture = LoadTextureFromImage(img);
-              UnloadImage(img);
-              period = (info->sequence->frame_period / 34.07) / 1000 / 60;
-            }
-            UpdateTexture(texture, info->display_fbuf->buf[0]);
-            framenum++;
-          }
-          break;
-        default:
-          break;
+    lastFrame = framenum;
+    while (lastFrame == framenum) {
+      state = mpeg2_parse(decoder);
+      switch (state) {
+      case STATE_BUFFER:
+        size = fread(buffer, 1, BUFFER_SIZE, videoFile);
+        mpeg2_buffer(decoder, buffer, buffer + size);
+        if (size == 0) {
+          rewind(videoFile);
+          framenum = 0;
         }
+        break;
+      case STATE_SEQUENCE:
+        mpeg2_convert(decoder, mpeg2convert_rgb24, NULL);
+        break;
+      case STATE_SLICE:
+      case STATE_END:
+      case STATE_INVALID_END:
+        if (info->display_fbuf) {
+          if (knowDims == false) {
+            knowDims = true;
+            img.width = info->sequence->width;
+            img.height = info->sequence->height;
+            img.format = PIXELFORMAT_UNCOMPRESSED_R8G8B8;
+            img.mipmaps = 1;
+            img.data = (unsigned char *)malloc(img.width * img.height * 3);
+            texture = LoadTextureFromImage(img);
+            UnloadImage(img);
+          }
+          UpdateTexture(texture, info->display_fbuf->buf[0]);
+          framenum++;
+        }
+        break;
+      default:
+        break;
       }
     }
     BeginDrawing();
-    // DrawTextureEx(texture, (Vector2){0, 0}, 0, 1, WHITE);
     DrawTexturePro(texture, (Rectangle){0, 0, texture.width, texture.height},
                    (Rectangle){0, 0, GetScreenWidth(), GetScreenHeight()},
                    (Vector2){0, 0}, 0, WHITE);
