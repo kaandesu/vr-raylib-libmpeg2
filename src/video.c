@@ -22,6 +22,7 @@
  */
 
 #include "raylib.h"
+#include "raymath.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -37,7 +38,8 @@
 #define STREAM_FRAME_RATE 60
 
 #define VID "data/eq.mpg"
-// #define VID "data/orion.mpg"
+
+void rlSetup(Texture *t, Camera *c, Model *p);
 
 int main(void) {
   InitWindow(WIDHT, HEIGHT, "raylib example - mpeg2 decode");
@@ -52,31 +54,33 @@ int main(void) {
   mpeg2_state_t state;
   size_t size;
 
-  FILE *videoFile = fopen(VID, "rb");
-  if (!videoFile) {
+  FILE *video_file = fopen(VID, "rb");
+  if (!video_file) {
     TraceLog(LOG_ERROR, "could not read the video file");
     exit(EXIT_FAILURE);
   }
 
   bool knowDims = false;
-  int framenum = 0;
+  int frame_count = 0;
 
-  SetTargetFPS(STREAM_FRAME_RATE);
-  Image img = {0};
-  Texture texture = {0};
+  Image img;
+  Texture texture;
+  Camera cam = {0};
+  Model plane_model = {0};
+  rlSetup(&texture, &cam, &plane_model);
 
-  int lastFrame;
+  int last_frame;
   while (!WindowShouldClose()) {
-    lastFrame = framenum;
-    while (lastFrame == framenum) {
+    last_frame = frame_count;
+    while (last_frame == frame_count) {
       state = mpeg2_parse(decoder);
       switch (state) {
       case STATE_BUFFER:
-        size = fread(buffer, 1, BUFFER_SIZE, videoFile);
+        size = fread(buffer, 1, BUFFER_SIZE, video_file);
         mpeg2_buffer(decoder, buffer, buffer + size);
         if (size == 0) {
-          rewind(videoFile);
-          framenum = 0;
+          rewind(video_file);
+          frame_count = 0;
         }
         break;
       case STATE_SEQUENCE:
@@ -97,7 +101,7 @@ int main(void) {
             UnloadImage(img);
           }
           UpdateTexture(texture, info->display_fbuf->buf[0]);
-          framenum++;
+          frame_count++;
         }
         break;
       default:
@@ -105,9 +109,11 @@ int main(void) {
       }
     }
     BeginDrawing();
-    DrawTexturePro(texture, (Rectangle){0, 0, texture.width, texture.height},
-                   (Rectangle){0, 0, GetScreenWidth(), GetScreenHeight()},
-                   (Vector2){0, 0}, 0, WHITE);
+    ClearBackground(DARKGRAY);
+    BeginMode3D(cam);
+    DrawGrid(50, 1);
+    DrawModel(plane_model, (Vector3){0, 0, -10}, 1, WHITE);
+    EndMode3D();
 
     EndDrawing();
   }
@@ -117,4 +123,17 @@ int main(void) {
   mpeg2_close(decoder);
 
   return EXIT_SUCCESS;
+}
+
+void rlSetup(Texture *t, Camera *c, Model *p) {
+  SetTargetFPS(STREAM_FRAME_RATE);
+  *p = LoadModelFromMesh(GenMeshPlane(15, 10, 1, 1));
+  SetMaterialTexture(&p->materials[0], MATERIAL_MAP_ALBEDO, *t);
+  p->transform = MatrixMultiply(MatrixRotateX(PI / 2), MatrixIdentity());
+
+  c->position = (Vector3){0, 2.0f, 4.0f};
+  c->target = (Vector3){0, 1.5f, 0.0f};
+  c->up = (Vector3){0, 1.0f, 0.0f};
+  c->fovy = 45.0f;
+  c->projection = CAMERA_PERSPECTIVE;
 }
