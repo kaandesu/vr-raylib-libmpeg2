@@ -2,7 +2,7 @@
 
 This project is about streaming video to Raylib in VR format, using [libmpeg2](https://libmpeg2.sourceforge.io/)
 for decoding. The main goal is to stream the PC desktop to mobile VR in a 3D virtual environment.
-There are also plans to port the project to Odin, Zig, or Go in the future.
+I might want to port the project to Odin, Zig, or Go in the future.
 
 > [!IMPORTANT]
 > vr-raylib-libmpeg2 is currently under development.
@@ -10,7 +10,12 @@ There are also plans to port the project to Odin, Zig, or Go in the future.
 So far:
 
 - Implemented video playback using Raylib and libmpeg2 to decode MPEG-2 video.
-- Managed frame parsing and rendering at ~30 FPS, converting video frames to RGB for display.
+- Managed frame parsing and rendering at 60 FPS, converting video frames to RGB for display.
+
+Current on-going tasks:
+
+- [x] entering the 3D mode and rendering the video texture on a plane
+- [ ] adding the VR mode
 
 <div align="center">
   <img width="520" src="./data/demo.gif">
@@ -18,7 +23,7 @@ So far:
 
 ### Project Setup for macOS and Linux
 
-This document outlines the steps to set up the development environment for the project on both macOS and Linux.
+This document outlines the steps to set up the development environment for the project on both macOS and Linux. (haven't tested on linux yet)
 
 ### Prerequisites
 
