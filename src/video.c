@@ -37,12 +37,12 @@
 #define BUFFER_SIZE 4096
 #define STREAM_FRAME_RATE 60
 
-#define VID "data/eq.mpg"
+#define VID "data/orion.mpg"
 
 void rlSetup(Texture *t, Camera *c, Model *p);
 
 int main(void) {
-  InitWindow(WIDHT, HEIGHT, "raylib example - mpeg2 decode");
+  InitWindow(WIDHT, HEIGHT, "vr-raylib-libmpeg2");
 
   uint8_t buffer[BUFFER_SIZE];
   mpeg2dec_t *decoder = mpeg2_init();
